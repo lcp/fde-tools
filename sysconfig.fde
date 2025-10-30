@@ -41,3 +41,10 @@ FDE_TPM_AUTO_UPDATE="yes"
 # Expected values: 2048, 3072, 4096, or just leave it empty to let fdectl
 # to determine the size at runtime
 FDE_RSA_KEY_SIZE=""
+
+# Specify the TPM persistent handle to store SRK
+# The valid range of this variable is 0x81000000~0x817FFFFF.
+# If this variable is unset, grub2 will generate SRK dynamically.
+# NOTE: The persistent handle will be overwritten. Please make sure that no
+#       other program is using the same handle before setting this variable.
+FDE_TPM_PERSISTENT_SRK=""

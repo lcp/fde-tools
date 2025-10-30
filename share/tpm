@@ -260,6 +260,13 @@ function tpm_seal_key {
 	extra_opts="${extra_opts} --rsa-bits ${rsa_size}"
     fi
 
+    if [ -n "$FDE_TPM_PERSISTENT_SRK" ]; then
+	# Check if pcr-oracle supports '--persistent-srk'
+	if ! pcr-oracle --persistent-srk 2>&1 | grep -q "unrecognized option"; then
+	    extra_opts="${extra_opts} --persistent-srk ${FDE_TPM_PERSISTENT_SRK}"
+	fi
+    fi
+
     local stop_event=$(bootloader_stop_event)
 
     echo "Sealing secret against PCR policy covering $FDE_SEAL_PCR_LIST" >&2
@@ -350,6 +357,13 @@ function tpm_seal_secret {
     # If we are expected to use an authorized policy, seal the secret
     # against that, using pcr-oracle rather than the tpm2 tools
     if [ -n "$authorized_policy" ]; then
+	if [ -n "$FDE_TPM_PERSISTENT_SRK" ]; then
+	    # Check if pcr-oracle supports '--persistent-srk'
+	    if ! pcr-oracle --persistent-srk 2>&1 | grep -q "unrecognized option"; then
+		extra_opts="${extra_opts} --persistent-srk ${FDE_TPM_PERSISTENT_SRK}"
+	    fi
+	fi
+
 	pcr-oracle ${extra_opts} \
 			--authorized-policy "$authorized_policy" \
 			--input $secret \

@@ -218,6 +218,14 @@ if cmd_requires_luks_device; then
 	luks_devices=$(luks_get_volume_for_fsdev "$fsdev")
 	if [ -z "$luks_devices" ]; then
 	    display_errorbox "Cannot find the underlying partition for $fsdev"
+
+	    # Compare the device ID and inode of '/' against the root of PID 1.
+	    # A mismatch indicates a chroot environment.
+	    if [ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]; then
+		# 'lsblk' may fail to show the filesystem type in a chroot environment
+		# due to incomplete udev db.
+		display_errorbox "Operation not supported in a chroot environment"
+	    fi
 	    exit 1
 	fi
 

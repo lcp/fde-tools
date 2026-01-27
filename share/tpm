@@ -88,6 +88,17 @@ function tpm_snapshot {
 
     local stop_event=$(bootloader_stop_event)
 
+    # Create the testcase/snapshot and the predicted PCR values
+    pcr_out=$(pcr-oracle \
+		--from eventlog \
+		--create-testcase ${tmpdir}/${snapshot} \
+		--stop-event "$stop_event" \
+		--after \
+		predict "$FDE_SEAL_PCR_LIST")
+
+    # Print the predicted PCR values
+    fde_trace "${pcr_out}"
+
     if [ -z "$FDE_LOG_DIR" ]; then
 	FDE_LOG_DIR=/var/log/fde
     fi
@@ -97,12 +108,8 @@ function tpm_snapshot {
 	return 0
     fi
 
-    pcr-oracle \
-		--from eventlog \
-		--create-testcase ${tmpdir}/${snapshot} \
-		--stop-event "$stop_event" \
-		--after \
-		predict "$FDE_SEAL_PCR_LIST" > ${tmpdir}/predicted-pcr.txt
+    # Save the predicted PCR to a file
+    printf "${pcr_out}\n" > ${tmpdir}/predicted-pcr.txt
 
     mv ${tmpdir}/predicted-pcr.txt ${tmpdir}/${snapshot}/predicted-pcr.txt
     cp /proc/sys/kernel/random/boot_id ${tmpdir}/${snapshot}/boot_id

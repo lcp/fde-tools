@@ -190,10 +190,12 @@ function tpm_inspect {
 
     # Check the boot ID and see if the predicted PCR values are for the next
     # boot or not.
-    if diff ${tmpdir}/${snapshot}/boot_id ${sys_boot_id} > /dev/null; then
-	echo "Sealed key authorized for the next boot"
-	rm -rf ${tmpdir}
-	return 0
+    if [ -f ${tmpdir}/${snapshot}/boot_id ]; then
+	if diff ${tmpdir}/${snapshot}/boot_id ${sys_boot_id} > /dev/null; then
+	    echo "Sealed key authorized for the next boot"
+	    rm -rf ${tmpdir}
+	    return 0
+	fi
     fi
 
     fde_trace "PCR mismatch detected:"

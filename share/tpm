@@ -214,7 +214,7 @@ function tpm_inspect {
     inspect_pcr_list=$(echo "${pcr_list} 4" | tr ' ' '\n' | sort -n | uniq | paste -s -d ',')
 
     # List the detailed TPM events of the affected PCR
-    pcr_out=$(pcr-oracle -d \
+    pcr_out=$(pcr-oracle \
 		--from eventlog \
 		--replay-testcase ${tmpdir}/${snapshot} \
 		--compare-current \

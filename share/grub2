@@ -36,6 +36,7 @@ alias bootloader_wipe=grub_wipe
 alias bootloader_rsa_sizes=grub_rsa_sizes
 alias bootloader_stop_event=grub_stop_event
 alias bootloader_platform_parameters=grub_platform_parameters
+alias bootloader_get_srk_alg=grub_get_srk_alg
 
 ##################################################################
 # Edit a variable in /etc/default/grub
@@ -76,6 +77,18 @@ function grub_get_fde_password {
 }
 
 ##################################################################
+# Obtain the configured SRK algorithm from grub.
+##################################################################
+function grub_get_srk_alg {
+
+    if [ -f /etc/default/grub ]; then
+        . /etc/default/grub
+    fi
+
+    echo "$GRUB_TPM2_SRK_ALG"
+}
+
+##################################################################
 # Update the grub.cfg residing on the EFI partition to properly
 # unseal the TPM protected LUKS partition
 ##################################################################
@@ -86,7 +99,11 @@ function grub_update_early_config {
 
     grub_set_control GRUB_ENABLE_CRYPTODISK "y"
     grub_set_control GRUB_TPM2_SEALED_KEY "$sealed_key_file"
-    grub_set_control GRUB_TPM2_SRK_ALG "RSA${rsa_key_size}"
+    if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
+	grub_set_control GRUB_TPM2_SRK_ALG "ECC"
+    else
+	grub_set_control GRUB_TPM2_SRK_ALG "RSA${rsa_key_size}"
+    fi
 
     # Do not clear the password implicitly; require fdectl or
     # jeos firstboot to do so explicitly.

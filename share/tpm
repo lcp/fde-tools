@@ -79,6 +79,62 @@ function tpm_get_rsa_key_size {
     echo "$__fde_rsa_key_size"
 }
 
+function tpm_get_ecc_srk_support {
+
+    declare -g __fde_ecc_srk
+
+    if [ -n "$__fde_ecc_srk" ]; then
+	echo "$__fde_ecc_srk"
+	return
+    fi
+
+    if pcr-oracle --ecc-srk 2>&1 | grep -q "unrecognized option"; then
+	__fde_ecc_srk="no"
+	echo "$__fde_ecc_srk"
+	return
+    fi
+
+    if [ "$FDE_ECC_SRK" = "yes" ]; then
+	__fde_ecc_srk="yes"
+	echo "$__fde_ecc_srk"
+	return
+    fi
+
+    if [ "$FDE_ECC_SRK" = "no" ]; then
+	__fde_ecc_srk="no"
+	echo "$__fde_ecc_srk"
+	return
+    fi
+
+    # If FDE_ECC_SRK is "auto", resolve dynamically
+    if [ "$FDE_ECC_SRK" = "auto" ]; then
+	# If an existing key is already present, stick to its alg.
+	# However, if command is "regenerate-key", reset and re-evaluate SRK
+	# settings.
+	if [ "$command" != "regenerate-key" ] && bootloader_check_sealed_key; then
+	    if [ "$(bootloader_get_srk_alg)" = "ECC" ]; then
+		__fde_ecc_srk="yes"
+	    else
+		__fde_ecc_srk="no"
+	    fi
+	    echo "$__fde_ecc_srk"
+	    return
+	fi
+
+	# Fresh install or reset: Use pcr-oracle's ecc-test to verify support
+	if pcr-oracle ecc-test >/dev/null 2>&1; then
+	    __fde_ecc_srk="yes"
+	else
+	    __fde_ecc_srk="no"
+	fi
+	echo "$__fde_ecc_srk"
+	return
+    fi
+
+    __fde_ecc_srk="no"
+    echo "$__fde_ecc_srk"
+}
+
 function tpm_snapshot {
     # TODO Add an ID to the snapshot name
     local snapshot=${FDE_SNAPSHOT_NAME}
@@ -256,7 +312,9 @@ function tpm_seal_key {
     local extra_opts=$(tpm_platform_parameters)
     local rsa_size=$(tpm_get_rsa_key_size)
 
-    if [ -n "$rsa_size" -a "$rsa_size" -ne 2048 ]; then
+    if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
+	extra_opts="${extra_opts} --ecc-srk"
+    elif [ -n "$rsa_size" -a "$rsa_size" -ne 2048 ]; then
 	extra_opts="${extra_opts} --rsa-bits ${rsa_size}"
     fi
 
@@ -287,6 +345,9 @@ function tpm_test {
     key_size=$1
 
     local extra_opts=$(tpm_platform_parameters)
+    if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
+	extra_opts="${extra_opts} --ecc-srk"
+    fi
 
     secret=$(fde_make_tempfile secret)
     dd if=/dev/zero of=$secret bs=$key_size count=1 status=none >&2
@@ -350,7 +411,9 @@ function tpm_seal_secret {
     local extra_opts=$(tpm_platform_parameters)
     local rsa_size=$(tpm_get_rsa_key_size)
 
-    if [ -n "$rsa_size" -a "$rsa_size" -ne 2048 ]; then
+    if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
+	extra_opts="${extra_opts} --ecc-srk"
+    elif [ -n "$rsa_size" -a "$rsa_size" -ne 2048 ]; then
 	extra_opts="${extra_opts} --rsa-bits ${rsa_size}"
     fi
 

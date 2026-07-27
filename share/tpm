@@ -475,7 +475,7 @@ function tpm_create_authorized_policy {
 
     # Generate the private key if it does not exist
     local extra_opts=
-    if [ ! -f "$secret_key" ]; then
+    if [ ! -f "$secret_key" ] || [ "$command" = "regenerate-key" ]; then
 	local rsa_size=$(tpm_get_rsa_key_size)
 
 	extra_opts="--rsa-generate-key"

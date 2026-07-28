@@ -310,12 +310,9 @@ function tpm_seal_key {
     local sealed_secret=$2
 
     local extra_opts=$(tpm_platform_parameters)
-    local rsa_size=$(tpm_get_rsa_key_size)
 
     if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
 	extra_opts="${extra_opts} --ecc-srk"
-    elif [ -n "$rsa_size" -a "$rsa_size" -ne 2048 ]; then
-	extra_opts="${extra_opts} --rsa-bits ${rsa_size}"
     fi
 
     if [ -n "$FDE_TPM_PERSISTENT_SRK" ]; then
@@ -409,12 +406,9 @@ function tpm_seal_secret {
     local authorized_policy="$3"
 
     local extra_opts=$(tpm_platform_parameters)
-    local rsa_size=$(tpm_get_rsa_key_size)
 
     if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
 	extra_opts="${extra_opts} --ecc-srk"
-    elif [ -n "$rsa_size" -a "$rsa_size" -ne 2048 ]; then
-	extra_opts="${extra_opts} --rsa-bits ${rsa_size}"
     fi
 
     # If we are expected to use an authorized policy, seal the secret

@@ -95,14 +95,13 @@ function grub_get_srk_alg {
 function grub_update_early_config {
 
     local sealed_key_file="$1"
-    local rsa_key_size=$(tpm_get_rsa_key_size)
 
     grub_set_control GRUB_ENABLE_CRYPTODISK "y"
     grub_set_control GRUB_TPM2_SEALED_KEY "$sealed_key_file"
     if [ "$(tpm_get_ecc_srk_support)" = "yes" ]; then
 	grub_set_control GRUB_TPM2_SRK_ALG "ECC"
     else
-	grub_set_control GRUB_TPM2_SRK_ALG "RSA${rsa_key_size}"
+	grub_set_control GRUB_TPM2_SRK_ALG "RSA"
     fi
 
     # Do not clear the password implicitly; require fdectl or

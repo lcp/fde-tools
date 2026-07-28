@@ -39,7 +39,6 @@ alias bootloader_wipe=systemd_wipe
 alias bootloader_rsa_sizes=systemd_rsa_sizes
 alias bootloader_stop_event=systemd_stop_event
 alias bootloader_platform_parameters=systemd_platform_parameters
-alias bootloader_get_srk_alg=systemd_get_srk_alg
 
 function not_implemented {
 
@@ -72,16 +71,6 @@ function systemd_get_fde_password {
     not_implemented
     return 1
 }
-
-##################################################################
-# Obtain the configured SRK algorithm.
-##################################################################
-function systemd_get_srk_alg {
-
-    not_implemented
-    return 1
-}
-
 ##################################################################
 # This function implements the boot loader specific part of
 # tpm-enable when using an authorized policy.

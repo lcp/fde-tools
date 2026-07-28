@@ -108,19 +108,6 @@ function tpm_get_ecc_srk_support {
 
     # If FDE_ECC_SRK is "auto", resolve dynamically
     if [ "$FDE_ECC_SRK" = "auto" ]; then
-	# If an existing key is already present, stick to its alg.
-	# However, if command is "regenerate-key", reset and re-evaluate SRK
-	# settings.
-	if [ "$command" != "regenerate-key" ] && bootloader_check_sealed_key; then
-	    if [ "$(bootloader_get_srk_alg)" = "ECC" ]; then
-		__fde_ecc_srk="yes"
-	    else
-		__fde_ecc_srk="no"
-	    fi
-	    echo "$__fde_ecc_srk"
-	    return
-	fi
-
 	# Fresh install or reset: Use pcr-oracle's ecc-test to verify support
 	if pcr-oracle ecc-test >/dev/null 2>&1; then
 	    __fde_ecc_srk="yes"

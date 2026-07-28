@@ -41,7 +41,7 @@ FDE_TPM_AUTO_UPDATE="yes"
 # Set to yes/no/auto (default is auto)
 FDE_ECC_SRK="auto"
 
-# The RSA key size to be used for SRK and the private sign key
+# The RSA key size to be used for the private sign key
 # Expected values: 2048, 3072, 4096, or just leave it empty to let fdectl
 # to determine the size at runtime
 FDE_RSA_KEY_SIZE=""

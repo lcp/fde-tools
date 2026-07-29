@@ -57,7 +57,7 @@ function tpm_get_rsa_key_size {
 
     # Check if pcr-oracle supports rsa-test
     # If pcr-oracle prints "Unknown action", fall back to default.
-    if pcr-oracle rsa-test 2>&1 | grep -q "Unknown action"; then
+    if LC_ALL=C pcr-oracle rsa-test 2>&1 | grep -q "Unknown action"; then
 	__fde_rsa_key_size="2048"
 	echo "$__fde_rsa_key_size"
 	return
@@ -88,7 +88,7 @@ function tpm_get_ecc_srk_support {
 	return
     fi
 
-    if pcr-oracle --ecc-srk 2>&1 | grep -q "unrecognized option"; then
+    if LC_ALL=C pcr-oracle --ecc-srk 2>&1 | grep -q "unrecognized option"; then
 	__fde_ecc_srk="no"
 	echo "$__fde_ecc_srk"
 	return
@@ -250,7 +250,7 @@ function tpm_inspect {
     done
 
     # Check if pcr-oracle support '--compare-current'.
-    if pcr-oracle --compare-current 2>&1 | grep -q "unrecognized option"; then
+    if LC_ALL=C pcr-oracle --compare-current 2>&1 | grep -q "unrecognized option"; then
 	return 0
     fi
 
@@ -284,7 +284,7 @@ function tpm_platform_parameters {
     fi
 
     # Check if pcr-oracle supports "--target-platform"
-    if pcr-oracle --target-platform 2>&1 | grep -q "unrecognized option"; then
+    if LC_ALL=C pcr-oracle --target-platform 2>&1 | grep -q "unrecognized option"; then
 	__fde_platform_param="--key-format tpm2.0"
 	echo "$__fde_platform_param"
 	return
@@ -307,7 +307,7 @@ function tpm_seal_key {
 
     if [ -n "$FDE_TPM_PERSISTENT_SRK" ]; then
 	# Check if pcr-oracle supports '--persistent-srk'
-	if ! pcr-oracle --persistent-srk 2>&1 | grep -q "unrecognized option"; then
+	if ! LC_ALL=C pcr-oracle --persistent-srk 2>&1 | grep -q "unrecognized option"; then
 	    extra_opts="${extra_opts} --persistent-srk ${FDE_TPM_PERSISTENT_SRK}"
 	fi
     fi
@@ -406,7 +406,7 @@ function tpm_seal_secret {
     if [ -n "$authorized_policy" ]; then
 	if [ -n "$FDE_TPM_PERSISTENT_SRK" ]; then
 	    # Check if pcr-oracle supports '--persistent-srk'
-	    if ! pcr-oracle --persistent-srk 2>&1 | grep -q "unrecognized option"; then
+	    if ! LC_ALL=C pcr-oracle --persistent-srk 2>&1 | grep -q "unrecognized option"; then
 		extra_opts="${extra_opts} --persistent-srk ${FDE_TPM_PERSISTENT_SRK}"
 	    fi
 	fi

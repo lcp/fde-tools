@@ -94,20 +94,23 @@ function tpm_get_ecc_srk_support {
 	return
     fi
 
-    if [ "$FDE_ECC_SRK" = "yes" ]; then
+    # Fallback to "auto" if FDE_ECC_SRK is empty
+    local ecc_srk="${FDE_ECC_SRK:-auto}"
+
+    if [ "$ecc_srk" = "yes" ]; then
 	__fde_ecc_srk="yes"
 	echo "$__fde_ecc_srk"
 	return
     fi
 
-    if [ "$FDE_ECC_SRK" = "no" ]; then
+    if [ "$ecc_srk" = "no" ]; then
 	__fde_ecc_srk="no"
 	echo "$__fde_ecc_srk"
 	return
     fi
 
     # If FDE_ECC_SRK is "auto", resolve dynamically
-    if [ "$FDE_ECC_SRK" = "auto" ]; then
+    if [ "$ecc_srk" = "auto" ]; then
 	# Fresh install or reset: Use pcr-oracle's ecc-test to verify support
 	if pcr-oracle ecc-test >/dev/null 2>&1; then
 	    __fde_ecc_srk="yes"

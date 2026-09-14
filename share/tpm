@@ -28,11 +28,12 @@ function tpm_present_and_working {
     # Try to fail more gracefully when there's no TPM (esp on platforms
     # that do not support TPM devices at all).
     if [ ! -d /sys/class/tpm ]; then
-	fde_trace "There do not seem to be any TPM devices."
+	fde_trace "There do not seem to be any TPM devices. Full disk encryption with TPM protection not available."
+	return 1
     fi
 
     if ! pcr-oracle self-test; then
-	fde_trace "This system does not have a TPM2 chip. Full disk encryption with TPM protection not available"
+	fde_trace "TPM2 self-test failed. Please verify your TPM configuration (e.g., ensure Storage Hierarchy is enabled and Owner Authorization is not set)."
 	return 1
     fi
 
